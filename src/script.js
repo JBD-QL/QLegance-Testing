@@ -7,32 +7,56 @@ document.onreadystatechange = (event) =>{
 }
 
 function app() {
-  let testButton = document.getElementById('test-button');
-  testButton.addEventListener('click', test);
+  let queryButton = document.getElementById('query-button');
+  let mutationButton = document.getElementById('mutation-button');
+
+  queryButton.addEventListener('click', query);
+  mutationButton.addEventListener('click', mutation);
 }
 
-function test(){
+// "query": `mutation numberSaver {post: saveNums(box1: ${box1}, box2: ${box2}, box3: ${box3}, box4: ${box4}) { box1 box2 box3 box4 } }`
+
+function mutation(){
   let body = {
     query: `
-      query getEcho{
-        echo
+      mutation addUser{
+        createdUser: create(username: "Dhani", alt: "bonafide", password: "surely") {
+          username alt password
+        }
+      }
+    `/*,
+    variables: {input: 'my hopeful parameter input'}*/
+  }
+
+  axios({
+    method: 'post',
+    url: '/graphql',
+    data: body,
+    headers: {'Content-Type': 'application/json'}
+  }).then((result) => {
+    console.log('result from mutation', result.data.data);
+  });
+}
+
+function query(){
+  let body = {
+    query: `
+      query hello {
+        who: greeting{
+         username,
+         alt,
+         password
+        }
       }
     `
   };
 
   axios({
-    method: 'get',
-    url: '/graphql',
-    params:  body
-  }).then((result) => {
-    console.log('hello from get request: ', result.data.data);
-  });
-
-  axios({
     method: 'post',
     url: '/graphql',
-    data:  body
+    data: body,
+    headers: {'Content-Type': 'application/json'}
   }).then((result) => {
-    console.log('hello from post request: ', result.data.data);
+    console.log('result from query', result.data.data);
   });
 }

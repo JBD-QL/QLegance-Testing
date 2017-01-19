@@ -1,27 +1,28 @@
 const express = require('express');
 const graphqlHTTP = require('express-graphql');
-const Sequelize = require('sequelize');
 const mysql = require('promise-mysql');
 const path = require('path');
-const schema = require('./schema.js');
+//const schema = require('./schema.js');
 const bodyParser = require('body-parser');
-
-const sequelize = new Sequelize('graph', 'root', '2323');
+import {User, Schema} from './schema.js';
+import {graphql} from 'graphql';
 
 const app = express();
 
 app.use(bodyParser());
 app.use(express.static(path.join(__dirname + '/src')));
+
+// app.use('/graphql', (req, res) => {
+//     console.log('doing server stuff', req.body);
+//     res.end()
+// });
+
 app.use('/graphql', graphqlHTTP ((req) => ({
-  schema: schema,
+  schema: Schema,
+  rootValue: 'rootValue',
   graphiql: true
 })));
 
-
-app.get('/test', (req, res) => {
-  console.log('yess!!!');
-});
-
 app.listen(8080, () => {
   console.log('... graphql listening on 8080');
-})
+});

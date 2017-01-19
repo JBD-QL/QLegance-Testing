@@ -10,33 +10,63 @@ import {
   graphql
 } from 'graphql';
 
+const Sequelize = require('sequelize');
+const sequelize = new Sequelize('graph', 'root', '2323');
+
+const User = sequelize.define('user', {
+  username: Sequelize.STRING,
+  alt: Sequelize.STRING,
+  password: Sequelize.STRING
+});
+
+User.sync();
+
+//User.create({username: "Markle", alt: 'jerk', password: 'pass'})
+
+const UserQL = new GraphQLObjectType({
+  name: 'UserQL',
+  fields: () => ({
+    username: {type: new GraphQLNonNull(GraphQLString)},
+    alt: {type: new GraphQLNonNull(GraphQLString)},
+    password: {type: new GraphQLNonNull(GraphQLString)}
+  })
+});
+
 const Query = new GraphQLObjectType({
   name: 'RootQueries',
   fields: () => ({
-    echo: {
-      type: GraphQLString,
-      // args: {
-      //   message: {type: GraphQLString}
-      // },
-      resolve(rootValue) {
-        return `received  message`;
+    greeting: {
+      type: UserQL,
+      args: {},
+      resolve(parentValue, args, request) {
+        return User.findOne({});
       }
     }
   })
 });
 
-const Schema = new GraphQLSchema({
-  query: Query
+const Mutation = new GraphQLObjectType({
+  name: 'MutationQL',
+  fields: {
+    create: {
+      type: UserQL,
+      args: {
+        username: {type: new GraphQLNonNull(GraphQLString)},
+        alt: {type: new GraphQLNonNull(GraphQLString)},
+        password: {type: new GraphQLNonNull(GraphQLString)}
+      },
+      resolve: (source, args) => {
+        console.log('hello from Mutation');
+        let user = Object.assign({}, args);
+        return User.create(user);
+      }
+    }
+  }
 });
 
-module.exports = Schema;
+const Schema = new GraphQLSchema({
+  query: Query,
+  mutation: Mutation
+});
 
-// let query = `
-//   query getEcho($inputMessage: String!) {
-//     receivedMessage: echo(message: $inputMessage)
-//   }
-// `;
-//
-// graphql(Schema, query, null, null,{inputMessage: "Hello"}).then(function(result) {
-//   console.log(result);
-// });
+module.exports = {Schema, User};
