@@ -7,13 +7,21 @@
 
     </style>
   </head>
-  <body>
+  <body ql-ctrl='app'>
       <h1>Graphing it all Night</h1>
-      <input type='button' id='query-button' value="Query">
+
+      <div ql-field='user'>
+        <input type='text' ql-type='username' class='username' />
+        <input type='text' ql-type='password' class='password' />
+        <input type='text' ql-type='alt' class='alt'/>
+        <input type='button' id='query-button' value="Query">
+      </div>
+
       <input type='button' id='mutation-button' value='Mutation'>
 
 
       <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+      <script src='bind.js'></script>
       <script src='script.js'></script>
   </body>
 </html>

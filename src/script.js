@@ -14,18 +14,17 @@ function app() {
   mutationButton.addEventListener('click', mutation);
 }
 
-// "query": `mutation numberSaver {post: saveNums(box1: ${box1}, box2: ${box2}, box3: ${box3}, box4: ${box4}) { box1 box2 box3 box4 } }`
-
 function mutation(){
-  let body = {
-    query: `
-      mutation addUser{
-        createdUser: create(username: "Dhani", alt: "bonafide", password: "surely") {
-          username alt password
-        }
+  QLegance.test1.query =  `
+    mutation addUser{
+      createdUser: create(username: "Judy", alt: "sup dog", password: "cherries") {
+        username alt password
       }
-    `/*,
-    variables: {input: 'my hopeful parameter input'}*/
+    }
+  `;
+
+  let body = {
+    query: QLegance.test1.query
   }
 
   axios({
@@ -39,17 +38,23 @@ function mutation(){
 }
 
 function query(){
-  let body = {
-    query: `
-      query hello {
-        who: greeting{
-         username,
-         alt,
-         password
-        }
+  QLegance.user.query = `
+    query hello {
+      who: greeting{
+        ${QLegance.user.types}
+  
       }
-    `
+    }
+  `;
+
+  console.log(QLegance.user.query);
+  let body = {
+    query: QLegance.user.query
   };
+
+    let event = new CustomEvent('change');
+    let keys = Object.keys(QLegance);
+    QLegance[keys[0]].element.dispatchEvent(event);
 
   axios({
     method: 'post',
