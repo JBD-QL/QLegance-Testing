@@ -10,14 +10,21 @@
   <body ql-ctrl='app'>
       <h1>Graphing it all Night</h1>
 
-      <div ql-field='user'>
-        <input type='text' ql-type='username' class='username' />
-        <input type='text' ql-type='password' class='password' />
-        <input type='text' ql-type='alt' class='alt'/>
-        <input type='button' id='query-button' value="Query">
+      <div ql-type='user'>
+        <input type='text' ql-field='username' class='username' />
+        <input type='text' ql-field='password' class='password' />
+        <input type='text' ql-field='alt' class='alt'/>
+        <input type='button' id='mutation-button' value='Mutation'>
       </div>
 
-      <input type='button' id='mutation-button' value='Mutation'>
+      <div>
+          <ul ql-list='users'>
+            <li ql-field='username'></li>
+            <li ql-field='password'></li>
+            <li ql-field='alt'></li>
+          </ul>
+        <input type='button' id='query-button' value="Query">
+      <div>
 
 
       <script src="https://unpkg.com/axios/dist/axios.min.js"></script>

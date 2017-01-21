@@ -15,16 +15,20 @@ function app() {
 }
 
 function mutation(){
-  QLegance.test1.query =  `
+  let username = document.querySelector('.username').value;
+  let password = document.querySelector('.password').value;
+  let alt = document.querySelector('.alt').value;
+
+  QLegance.user.mutation =  `
     mutation addUser{
-      createdUser: create(username: "Judy", alt: "sup dog", password: "cherries") {
-        username alt password
+      createdUser: create(username: "${username}", alt: "${alt}", password: "${password}") {
+        ${QLegance.user.fields}
       }
     }
   `;
 
   let body = {
-    query: QLegance.test1.query
+    query: QLegance.user.mutation
   }
 
   axios({
@@ -38,23 +42,16 @@ function mutation(){
 }
 
 function query(){
-  QLegance.user.query = `
-    query hello {
-      who: greeting{
-        ${QLegance.user.types}
-  
+  QLegance.users.query = `
+    query getUsers{
+      users: allUsers{
+        ${QLegance.users.fields}
       }
-    }
-  `;
+    }`;
 
-  console.log(QLegance.user.query);
   let body = {
-    query: QLegance.user.query
+    query: QLegance.users.query
   };
-
-    let event = new CustomEvent('change');
-    let keys = Object.keys(QLegance);
-    QLegance[keys[0]].element.dispatchEvent(event);
 
   axios({
     method: 'post',
@@ -62,6 +59,8 @@ function query(){
     data: body,
     headers: {'Content-Type': 'application/json'}
   }).then((result) => {
-    console.log('result from query', result.data.data);
+    QLegance.users.populate(result.data.data);
+  }).catch((err) => {
+    console.log(err);
   });
 }

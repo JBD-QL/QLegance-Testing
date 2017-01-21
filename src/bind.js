@@ -2,43 +2,69 @@
 
 let QLegance = (()=>{
   let controller = document.querySelector('[ql-ctrl]');
-  let elements = controller.querySelectorAll('[ql-field]');
+  let elements = controller.querySelectorAll('[ql-type], [ql-list]');
 
   class Binder{
-    constructor(els){
-      let len = els.length;
-      let fields, directive;
+    constructor(elements){
+      let len = elements.length;
+      let fields, type;
 
       for(let i = 0; i < len; i++){
-        directive = els[i].getAttribute('ql-field');
-        fields = els[i].querySelectorAll('[ql-type]');
+        type = this.getAttr(elements[i]);
+        fields = elements[i].querySelectorAll('[ql-field]');
 
-        this[directive] = {};
-        this[directive].element = els[i];
-        this[directive].data = els[i].value;
-        this[directive].element.addEventListener('change', this, false);
-        this[directive].types = '';
+        this[type] = {};
+        this[type].element = elements[i];
+        this[type].data = elements[i].value;
+        this[type].element.addEventListener('change', this, false);
+        this[type].fields = '';
+        this[type].populate = populate;
 
         for(let n = 0; n < fields.length; n++){
-          this[directive].types += fields[n].getAttribute('ql-type') + '\n';
+          this[type].fields += this.getAttr(fields[n]) + '\n';
         }
       }
     }
 
     handlEvent(event){
-      console.log('hello world');
       if(event.type === 'change'){
         this.change(event);
       }
     }
 
     change(event){
-      console.log('hello Show me change')
       if(!event.target) return;
       let element = event.target;
-      let directive = element.getAttribute('ql-field');
-      this[directive].data = element.value;
-      this[directive].element.value = element.value;
+      let type = this.getAttr(element);
+      this[type].data = element.value;
+      this[type].element.value = element.value;
+    }
+
+    getAttr(element){
+      return element.getAttribute('ql-type') || element.getAttribute('ql-list') || element.getAttribute('ql-field');
+    }
+
+  }
+
+  function populate(data){
+    let fields = this.element.querySelectorAll('[ql-field]');
+    let users = data.users;
+    let fieldName;
+    let element;
+    let len;
+    let input;
+
+    for(let i = 0; i < users.length; i++){
+      len = Object.keys(users[i]).length;
+      for(let n = 0; n < len; n++){
+        element = document.createElement(fields[n].nodeName);
+        fields[n].remove();
+        fieldName = binder.getAttr(fields[n]);
+
+        input = element.value ? 'value' : 'innerHTML';
+        element[input] = users[i][fieldName];
+        this.element.append(element);
+      }
     }
   }
 

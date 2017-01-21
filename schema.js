@@ -21,7 +21,6 @@ const User = sequelize.define('user', {
 
 User.sync();
 
-//User.create({username: "Markle", alt: 'jerk', password: 'pass'})
 
 const UserQL = new GraphQLObjectType({
   name: 'UserQL',
@@ -40,6 +39,13 @@ const Query = new GraphQLObjectType({
       args: {},
       resolve(parentValue, args, request) {
         return User.findOne({});
+      },
+    },
+    allUsers: {
+      type: new GraphQLList(UserQL),
+      args: {},
+      resolve(parentValue, args, request){
+        return User.findAll({where: {'username': 'Judy'}});
       }
     }
   })
