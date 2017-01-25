@@ -45,17 +45,7 @@ const Query = new GraphQLObjectType({
       type: new GraphQLList(UserQL),
       args: {},
       resolve(parentValue, args, request){
-        return User.findAll({});
-      }
-    },
-    getUser: {
-      type: UserQL,
-      args: {
-        username: {type: new GraphQLNonNull(GraphQLString)}
-      },
-      resolve(parentValue, args, request){
-        let user = Object.assign({}, args);
-        return User.findOne({where: user});
+        return User.findAll({where: {'username': 'Judy'}});
       }
     }
   })
@@ -72,6 +62,7 @@ const Mutation = new GraphQLObjectType({
         password: {type: new GraphQLNonNull(GraphQLString)}
       },
       resolve: (source, args) => {
+        console.log('hello from Mutation');
         let user = Object.assign({}, args);
         return User.create(user);
       }

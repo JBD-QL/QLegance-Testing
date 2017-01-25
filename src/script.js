@@ -7,15 +7,11 @@ document.onreadystatechange = (event) =>{
 }
 
 function app() {
-  /*
-  */
   let queryButton = document.getElementById('query-button');
   let mutationButton = document.getElementById('mutation-button');
 
   queryButton.addEventListener('click', query);
   mutationButton.addEventListener('click', mutation);
-
-  console.log(localStorage);
 }
 
 function mutation(){
@@ -47,20 +43,24 @@ function mutation(){
 
 function query(){
   QLegance.users.query = `
-    query {
+    query getUsers{
       users: allUsers{
         ${QLegance.users.fields}
       }
     }`;
 
-  let query = QLegance.users.query;
+  let body = {
+    query: QLegance.users.query
+  };
 
-  console.log('The global Object', QLegance);
-
-  QLegance.setServer('/graphql');
-  QLegance.sendQuery(query).then((result) => {
-    QLegance.users.populate(result.data);
-    console.log('returning from sendQuery', result);
+  axios({
+    method: 'post',
+    url: '/graphql',
+    data: body,
+    headers: {'Content-Type': 'application/json'}
+  }).then((result) => {
+    QLegance.users.populate(result.data.data);
+  }).catch((err) => {
+    console.log(err);
   });
-
 }
