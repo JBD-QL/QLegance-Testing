@@ -21,6 +21,14 @@ const User = sequelize.define('user', {
 
 User.sync();
 
+// const GlobalId = new GraphQLObjectType({
+//   name: 'GlobalId',
+//   fields: () => ({
+//     globalId: {type: new GraphQLNonNull(GraphQLString)},
+//     query: {type: new GraphQLNonNull(GraphQLString)}
+//   });
+// });
+
 
 const UserQL = new GraphQLObjectType({
   name: 'UserQL',
@@ -84,4 +92,4 @@ const Schema = new GraphQLSchema({
   mutation: Mutation
 });
 
-module.exports = {Schema, User};
+module.exports = {Schema};

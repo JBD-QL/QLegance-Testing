@@ -11,11 +11,6 @@ const app = express();
 app.use(bodyParser());
 app.use(express.static(path.join(__dirname + '/src')));
 
-// app.use('/graphql', (req, res) => {
-//     console.log('doing server stuff', req.body);
-//     res.end()
-// });
-
 app.use('/graphql', graphqlHTTP ((req) => ({
   schema: Schema,
   rootValue: 'rootValue',
