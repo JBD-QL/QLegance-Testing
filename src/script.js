@@ -46,6 +46,9 @@ function mutation(){
 }
 
 function query(){
+
+  console.log(QLegance('#users'));
+  return;
   QLegance.users.query = `
     query {
       users: allUsers{
@@ -58,8 +61,7 @@ function query(){
   console.log('The global Object', QLegance);
 
   QLegance.setServer('/graphql');
-  QLegance.sendQuery(query).then((result) => {
-    QLegance.users.populate(result.data);
+  QLegance.users.sendQuery(query).then((result) => {
     console.log('returning from sendQuery', result);
   });
 

@@ -3,34 +3,57 @@
   <head>
     <meta charset="utf-8">
     <title>Hello World GraphQL</title>
-    <link href='./style.css' rel='stylesheet' type='text/css'/>
+    <link href='./sass/style.css' rel='stylesheet' type='text/css'/>
   </head>
-  <body ql-ctrl='app'>
-      <h1>Graphing it all Night</h1>
+  <body ql-server='/graphql'>
+    <nav>
+      <a href='' class='blog-link'>Blog</a>
+      <section class='profile'>
+        <img src=''/>
+        <span>Dhani's profile</span>
+      </section>
+    </nav>
+    <main>
+      <article>
+        <h1 class='article-title'>Graphing it all Night</h1>
+        <span class='article-details'> </span>
+        <p class='article-content'>
+          What is Lorem Ipsum?
+          Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+        </p>
+        <hr class='line-break'/>
+        <section class='article-comments'>
+          <div class='comment'>
+            <div class='user-info'>
+              Judy
+            </div>
+            <div class='comment-text'>
+              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+            </div>
+          </div>
+        </section>
+      </article>
+    </main>
 
-      <div ql-type='user'>
+      <div ql-type='UserQL | getUser(username: "Judy")' id='users'>
         <input type='text' ql-field='username' class='username' />
         <input type='text' ql-field='password' class='password' />
-        <input type='text' ql-field='alt' class='alt'/>
+        <h1 ql-field='alt' class='alt'></h1>
         <input type='button' id='mutation-button' value='Mutation'>
       </div>
 
-      <div>
-          <!-- <ul ql-list='users'>
-            <li ql-field='username'></li>
-            <li ql-field='password'></li>
-            <li ql-field='alt'></li>
-          </ul> -->
+      <!-- <div>
           <div ql-list='users'>
             <h1 ql-field='username'></h1>
             <input type='button' ql-field='alt' />
             <input type='text' ql-field='password' />
           </div>
-        <input type='button' id='query-button' value="Query">
-      <div>
+      </div> -->
+      <input type='button' id='query-button' value="Query">
 
-
+      <!-- <script data-main="scripts/main" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.js"></script> -->
       <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+      <!-- <script src='/../public/bundle.js'></script> -->
       <script src='bind.js'></script>
       <script src='script.js'></script>
   </body>

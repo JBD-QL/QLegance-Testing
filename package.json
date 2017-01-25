@@ -1,18 +1,19 @@
 {
-  "name": "hello-graphql",
+  "name": "qlegance",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serv": "node_modules/.bin/nodemon preset.js",
-    "start": "nodemon preset.js"
+    "start": "nodemon preset.js",
+    "build": "webpack -p"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "babel": "^6.5.2",
+    "babel-core": "^6.22.1",
+    "babel-loader": "^6.2.10",
     "babel-preset-es2015": "^6.18.0",
     "babel-register": "^6.18.0",
     "body-parser": "^1.16.0",
@@ -22,6 +23,17 @@
     "mysql": "^2.12.0",
     "nodemon": "^1.11.0",
     "promise-mysql": "^3.0.0",
-    "sequelize": "^3.29.0"
-  }
+    "sequelize": "^3.29.0",
+    "webpack": "^1.14.0"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhanimay/QLegance.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dhanimay/QLegance/issues"
+  },
+  "homepage": "https://github.com/dhanimay/QLegance#readme",
+  "description": ""
 }
