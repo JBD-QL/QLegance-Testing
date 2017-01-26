@@ -50,7 +50,7 @@ body, nav{
   width: 100%;
   position: absolute;
   top: 0; left: 0;
-  background-color: #e5dccc;
+  background-color: #f3efe7;
 }
 
 .blog-link{
@@ -104,10 +104,12 @@ article{
 }
 
 .user-info{
-	width: 20%;
-	height: 50%;
+	width: 15%;
+	margin-right: 5%;
+	padding: 4px;
 	float: left;
 	background-color: white;
+	text-align: center;
 }
 
 .comment-text{
@@ -115,7 +117,7 @@ article{
 	height: 100%;
 	padding: 4px;
 	float: left;
-	background-color: lightblue;
+	background-color: #d4e0e2;
 	overflow-y: auto;
 	font-size: 1.25rem;
 }
