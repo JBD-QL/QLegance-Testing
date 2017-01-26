@@ -11,7 +11,8 @@ import {
 } from 'graphql';
 
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('graph', 'root', '2323');
+// const sequelize = new Sequelize('graph', 'root', '2323');
+const sequelize = new Sequelize('postgres://pwfrfcks:Jhi-WHu6KoxqI6Z0f_OJtKBLdIfYjtF8@elmer.db.elephantsql.com:5432/pwfrfcks');
 
 const Post = sequelize.define('post', {
   _id: {
@@ -47,44 +48,34 @@ const PostQL = new GraphQLObjectType({
   })
 });
 
+// const PostQL = new GraphQLObjectType({
+//   name: 'Post',
+//   fields: () => ({
+//     _id: {type: GraphQLInt},
+//     title: {type: GraphQLString},
+//     createdAt: {type: GraphQLString},
+//     content: {type: GraphQLString},
+//     author: {type: GraphQLString}
+//   })
+// });
+
 const Query = new GraphQLObjectType({
   name: 'RootQueries',
   fields: () => ({
-    getPosts: {
-      type: Post,
+    getPostByAuthor: {
+      type: PostQL,
       args: {
-        _id: {type: GraphQLInt},
-        title: {type: GraphQLString},
-        author: {type: GraphQLString},
-        count : {type: GraphQLInt}
-      }
+        author: {type: new GraphQLNonNull(GraphQLString)},
+      },
       resolve(rootValue, args, request) {
-        const search = Object.assign({}, args);
-        return PostQL.findAll({ where : search}).slice(0, count);
+        return Post.findAll({where : args});
       }
     },
-    greeting: {
-      type: UserQL,
-      args: {},
-      resolve(parentValue, args, request) {
-        return User.findOne({});
-      },
-    },
-    allUsers: {
-      type: new GraphQLList(UserQL),
-      args: {},
-      resolve(parentValue, args, request){
-        return User.findAll({});
-      }
-    },
-    getUser: {
-      type: UserQL,
-      args: {
-        username: {type: new GraphQLNonNull(GraphQLString)}
-      },
-      resolve(parentValue, args, request){
-        let user = Object.assign({}, args);
-        return User.findOne({where: user});
+    getAllPosts: {
+      type: PostQL,
+      resolve(rootValue, args, request) {
+        console.log(Post.findAll({}));
+        // return Post.findAll({});
       }
     }
   })
@@ -93,16 +84,16 @@ const Query = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
   name: 'MutationQL',
   fields: {
-    create: {
-      type: UserQL,
+    createPost: {
+      type: PostQL,
       args: {
-        username: {type: new GraphQLNonNull(GraphQLString)},
-        alt: {type: new GraphQLNonNull(GraphQLString)},
-        password: {type: new GraphQLNonNull(GraphQLString)}
+        title: {type: new GraphQLNonNull(GraphQLString)},
+        content: {type: new GraphQLNonNull(GraphQLString)},
+        author: {type: new GraphQLNonNull(GraphQLString)}
       },
       resolve: (source, args) => {
-        let user = Object.assign({}, args);
-        return User.create(user);
+        let post = Object.assign({}, args);
+        return Post.create(post);
       }
     }
   }
