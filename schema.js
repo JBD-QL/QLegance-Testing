@@ -62,20 +62,46 @@ const PostQL = new GraphQLObjectType({
 const Query = new GraphQLObjectType({
   name: 'RootQueries',
   fields: () => ({
-    getPostByAuthor: {
+    getPostById: {
       type: PostQL,
+      args: {
+        _id: {type: new GraphQLNonNull(GraphQLInt)},
+      },
+      resolve(rootValue, args, request) {
+        const search = Object.assign({}, args);
+        return Post.findOne({where : search});
+      }
+    },
+    getPostByTitle: {
+      type: PostQL,
+      args: {
+        title: {type: new GraphQLNonNull(GraphQLString)},
+      },
+      resolve(rootValue, args, request) {
+        const search = Object.assign({}, args);
+        return Post.findOne({where : search});
+      }
+    },
+    getPostsByAuthor: {
+      type: new GraphQLList(PostQL),
       args: {
         author: {type: new GraphQLNonNull(GraphQLString)},
       },
       resolve(rootValue, args, request) {
-        return Post.findAll({where : args});
+        const search = Object.assign({}, args);
+        // console.log(search);
+        return Post.findAll({where : search});
       }
     },
     getAllPosts: {
-      type: PostQL,
+      type: new GraphQLList(PostQL),
+      args : {
+        count : {type: GraphQLInt}
+      },
       resolve(rootValue, args, request) {
-        console.log(Post.findAll({}));
-        // return Post.findAll({});
+        // const result = Post.findAll({});
+        return Post.findAll({});
+        // console.log(Post.findAll({}));
       }
     }
   })
