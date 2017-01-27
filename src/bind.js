@@ -67,39 +67,54 @@ let QL = (()=>{
       function domSelection(selection){
         /* selection can be called QLegance('#users(2)') to make list selections
         */
-        let collection;
-        if(typeof selection === 'string'){
-          collection = document.querySelectorAll(selection);
-          if(selection.indexOf('#') !== -1){
-            collection = collection[0];
-          }
+
+        //Check if selection is a wrapper object
+        if(selection.mutate !== undefined && selection.query !== undefined && selection.element !== undefined){
+          return selection;
         }
-        return wrapElement(collection);
+
+        //Check if selection is unacceptable - neither node or string value
+        if((selection.nodeType === undefined && selection.nodeName === undefined) && typeof selection !== 'string'){
+          return new Error('Unacceptable input value.');
+        }
+
+        // If selection is string perform a DOM query
+        if(typeof selection === 'string'){
+          selection = document.querySelectorAll(selection);
+
+          //No returned elements to wrap
+          if(selection.length === 0) return selection;
+        }
+
+        return wrapElement(selection);
       }
 
       function wrapElement(selection){
-        let wrapper = {element: selection};
+        let len = selection.length;
+        let wrapper = [];
 
-        wrapper.mutate = (method, args, returnValues, options) => {
-          return new Promise((resolve, reject) => {
-            method = 'getUser', args = {username: "Markle"}, returnValues = ['password'];
-            QLegance[method](args, returnValues).then((result) => {
-              let component = Client.components.find( component => { return selection === component.element; });
-              //if(!component) component = buildcomponent(selection);
+        for(let i = 0; i < len; i++){
+        wrapper[i] = {element: selection[i]};
+        console.log('selection: ', selection[i]);
+
+        wrapper[i].mutate = ((method, args, returnValues) => {
+          return single[method](args, returnValues).then((result) => {
+              let component = Client.components.find( component => { return selection[i] === component.element; });
               prePopulate(component, result.data);
               resolve(result.data);
             });
-          })
-        };
+        });
 
-        wrapper.query = (method, args, returnValues) => {
+        wrapper[i].query = (method, args, returnValues) => {
           return single[method](args, returnValues).then((result) => {
-            let component = Client.components.find( component => { return selection === component.element; });
+            let component = Client.components.find( component => { return selection[i] === component.element; });
+            console.log('I need this component', component);
             prePopulate(component, result.data);
             return result.data;
           });
         };
-        return wrapper;
+      }
+        return wrapper.length > 1 ? wrapper : wrapper[0];
       }
 
       function getAttr(element){
