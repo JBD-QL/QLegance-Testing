@@ -13,57 +13,93 @@ import {
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize('graph', 'root', '2323');
 
-const User = sequelize.define('user', {
-  username: Sequelize.STRING,
-  alt: Sequelize.STRING,
-  password: Sequelize.STRING
+const Post = sequelize.define('post', {
+  _id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  title: Sequelize.STRING,
+  date: Sequelize.STRING,
+  content: Sequelize.STRING,
+  author: Sequelize.STRING
 });
 
-User.sync();
+const Author = sequelize.define('author', {
+  _id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: Sequelize.STRING,
+  age: Sequelize.INTEGER,
+});
 
-// const GlobalId = new GraphQLObjectType({
-//   name: 'GlobalId',
-//   fields: () => ({
-//     globalId: {type: new GraphQLNonNull(GraphQLString)},
-//     query: {type: new GraphQLNonNull(GraphQLString)}
-//   });
-// });
+Author.sync();
+Post.sync();
 
-
-const UserQL = new GraphQLObjectType({
-  name: 'UserQL',
+const AuthorQL = new GraphQLObjectType({
+  name: 'Author',
   fields: () => ({
-    username: {type: new GraphQLNonNull(GraphQLString)},
-    alt: {type: new GraphQLNonNull(GraphQLString)},
-    password: {type: new GraphQLNonNull(GraphQLString)}
+    _id: {type: new GraphQLNonNull(GraphQLInt)},
+    author: {type: new GraphQLNonNull(GraphQLInt)},
+    age: {type: new GraphQLNonNull(GraphQLString)}
+  })
+});
+
+
+const PostQL = new GraphQLObjectType({
+  name: 'Post',
+  fields: () => ({
+    _id: {type: new GraphQLNonNull(GraphQLInt)},
+    title: {type: new GraphQLNonNull(GraphQLString)},
+    date: {type: new GraphQLNonNull(GraphQLString)},
+    content: {type: new GraphQLNonNull(GraphQLString)},
+    author: {type: new GraphQLNonNull(GraphQLString)},
   })
 });
 
 const Query = new GraphQLObjectType({
   name: 'RootQueries',
   fields: () => ({
-    greeting: {
-      type: UserQL,
-      args: {},
-      resolve(parentValue, args, request) {
-        return User.findOne({});
+    getPostById: {
+      type: PostQL,
+      args: {
+        _id: {type: new GraphQLNonNull(GraphQLInt)},
       },
-    },
-    allUsers: {
-      type: new GraphQLList(UserQL),
-      args: {},
-      resolve(parentValue, args, request){
-        return User.findAll({});
+      resolve(rootValue, args, request) {
+        const search = Object.assign({}, args);
+        return Post.findOne({where : search});
       }
     },
-    getUser: {
-      type: UserQL,
+    getPostByTitle: {
+      type: PostQL,
       args: {
-        username: {type: new GraphQLNonNull(GraphQLString)}
+        title: {type: new GraphQLNonNull(GraphQLString)},
       },
-      resolve(parentValue, args, request){
-        let user = Object.assign({}, args);
-        return User.findOne({where: user});
+      resolve(rootValue, args, request) {
+        const search = Object.assign({}, args);
+        return Post.findOne({where : search});
+      }
+    },
+    getPostsByAuthor: {
+      type: new GraphQLList(PostQL),
+      args: {
+        author: {type: new GraphQLNonNull(GraphQLString)},
+      },
+      resolve(rootValue, args, request) {
+        const search = Object.assign({}, args);
+        // console.log(search);
+        return Post.findAll({where : search});
+      }
+    },
+    getAllPosts: {
+      type: new GraphQLList(PostQL),
+      args : {
+        count : {type: GraphQLInt}
+      },
+      resolve(rootValue, args, request) {
+        return Post.findAll({});
       }
     }
   })
@@ -72,16 +108,17 @@ const Query = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
   name: 'MutationQL',
   fields: {
-    create: {
-      type: UserQL,
+    createPost: {
+      type: PostQL,
       args: {
-        username: {type: new GraphQLNonNull(GraphQLString)},
-        alt: {type: new GraphQLNonNull(GraphQLString)},
-        password: {type: new GraphQLNonNull(GraphQLString)}
+        title: {type: new GraphQLNonNull(GraphQLString)},
+        content: {type: new GraphQLNonNull(GraphQLString)},
+        author: {type: new GraphQLNonNull(GraphQLString)},
+        date: {type: new GraphQLNonNull(GraphQLString)}
       },
       resolve: (source, args) => {
-        let user = Object.assign({}, args);
-        return User.create(user);
+        let post = Object.assign({}, args);
+        return Post.create(post);
       }
     }
   }

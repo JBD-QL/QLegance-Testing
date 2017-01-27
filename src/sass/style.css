@@ -50,35 +50,68 @@ body, nav {
   background-color: #f3efe7; }
 
 .blog-link {
+  font: 20px 'sans-serif';
   float: left; }
 
-.profile {
-  float: right; }
+.toggle {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  text-align: center;
+  margin-top: 1rem; }
+
+.all-button {
+  margin: 0 auto;
+  width: 8rem; }
+
+.author-button, .title-button {
+  width: 6rem;
+  margin: 0 .5rem;
+  cursor: pointer;
+  background-color: #97c5ff;
+  border-radius: 4px;
+  border: 1px solid black;
+  box-shadow: 0 0 1px black;
+  color: black; }
+
+.search-field {
+  width: 20%;
+  border: 1px black solid;
+  box-shadow: 0 0 1px black;
+  margin: .5rem;
+  border-radius: 4px;
+  padding-left: 6px; }
 
 main {
   margin: 0 auto;
   width: 94%;
-  margin: 4rem 0 0; }
-
-.article-title {
-  font-size: 2rem;
-  text-align: justify; }
+  margin: 4rem auto 0;
+  padding-top: 4rem; }
 
 article {
   font-size: 1.5rem; }
 
+.article-details {
+  font-size: 18px;
+  display: block;
+  margin: .5rem auto;
+  text-align: center; }
+
 .article-title {
   width: 100%;
-  text-align: center; }
+  text-align: center;
+  font-weight: bold;
+  font-size: 2rem; }
 
 .article-content {
   width: 60%;
-  margin: 3rem auto;
+  margin: 3rem auto 0;
   line-height: 125%; }
 
 .line-break {
-  width: 60%;
-  margin: 0 auto; }
+  width: 30%;
+  margin: 3rem auto; }
 
 .article-comments {
   width: 60%;
@@ -97,14 +130,22 @@ article {
   background-color: white;
   text-align: center; }
 
+.comment-header {
+  text-align: center;
+  margin-top: 2rem; }
+
 .comment-text {
   width: 80%;
-  height: 100%;
-  padding: 4px;
+  max-height: 100%;
+  padding: 12px;
   float: left;
   background-color: #d4e0e2;
+  box-shadow: 0 0 1px black;
   overflow-y: auto;
   font-size: 1.25rem; }
+
+.comment-text:before {
+  content: '    	'; }
 
 #query-button {
   margin-top: 2rem;
