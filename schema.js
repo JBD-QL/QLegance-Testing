@@ -11,7 +11,8 @@ import {
 } from 'graphql';
 
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('graph', 'root', '2323');
+ const sequelize = new Sequelize('graph', 'root', '2323');
+//const sequelize = new Sequelize('postgres://pwfrfcks:Jhi-WHu6KoxqI6Z0f_OJtKBLdIfYjtF8@elmer.db.elephantsql.com:5432/pwfrfcks');
 
 const Post = sequelize.define('post', {
   _id: {
@@ -21,9 +22,11 @@ const Post = sequelize.define('post', {
   },
   title: Sequelize.STRING,
   date: Sequelize.STRING,
+  createdAt: Sequelize.DATE,
   content: Sequelize.STRING,
   author: Sequelize.STRING
 });
+
 
 const Author = sequelize.define('author', {
   _id: {
@@ -89,7 +92,6 @@ const Query = new GraphQLObjectType({
       },
       resolve(rootValue, args, request) {
         const search = Object.assign({}, args);
-        // console.log(search);
         return Post.findAll({where : search});
       }
     },
