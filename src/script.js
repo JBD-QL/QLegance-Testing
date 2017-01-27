@@ -6,45 +6,38 @@ document.onreadystatechange = (event) =>{
   }
 }
 
+let search = document.querySelector('.search-field');
+
 function app() {
-  let queryButton = document.getElementById('query-button');
-  let mutationButton = document.getElementById('mutation-button');
+  let titleButton = document.querySelector('.title-button');
+  let authorButton = document.querySelector('.author-button');
 
-  queryButton.addEventListener('click', query);
-  mutationButton.addEventListener('click', mutation);
-
-  //console.log(localStorage);
+  titleButton.addEventListener('click', byTitle);
+  authorButton.addEventListener('click', byAuthor);
 }
 
-function mutation(){
-  let username = document.querySelector('.username').value;
-  let password = document.querySelector('.password').value;
-  let alt = document.querySelector('.alt').value;
+function byTitle(){
+  if(search.value === '') return;
 
-  QLegance.user.mutation =  `
-    mutation addUser{
-      createdUser: create(username: "${username}", alt: "${alt}", password: "${password}") {
-        ${QLegance.user.fields}
-      }
-    }
-  `;
+  let method = 'getPostByTitle';
+  let args = {title: search.value};
+  let returnValues =  ['title', 'content', 'author', 'date'];
 
-  let body = {
-    query: QLegance.user.mutation
-  }
-
-  axios({
-    method: 'post',
-    url: '/graphql',
-    data: body,
-    headers: {'Content-Type': 'application/json'}
-  }).then((result) => {
-    console.log('result from mutation', result.data.data);
-  });
+  /*  A query with a given selector will self populate by default,
+      the response will contain all relevant data as well
+  */
+  QL('#posts').query(method, args, returnValues)
+    .then((result) => {
+      console.log('The DOM already has my information :) --->', result);
+    });
 }
 
-function query(){
-QLegance('#users').mutate().then((result) => {
-  console.log('mutate result: ', result);
-});
+function byAuthor(){
+  /*  The query's response is a promise for asynchronous resolution
+  */
+  if(search.value === '') return;
+  QL.getPostsByAuthor({author: search.value}, ['author', 'title', 'date', 'content'])
+    .then((result)=>{
+      console.log('Results of getPostsByAuthor(): ', result.data);
+    });
 }

@@ -11,8 +11,8 @@ import {
 } from 'graphql';
 
 const Sequelize = require('sequelize');
-// const sequelize = new Sequelize('graph', 'root', '2323');
-const sequelize = new Sequelize('postgres://pwfrfcks:Jhi-WHu6KoxqI6Z0f_OJtKBLdIfYjtF8@elmer.db.elephantsql.com:5432/pwfrfcks');
+ const sequelize = new Sequelize('graph', 'root', '2323');
+//const sequelize = new Sequelize('postgres://pwfrfcks:Jhi-WHu6KoxqI6Z0f_OJtKBLdIfYjtF8@elmer.db.elephantsql.com:5432/pwfrfcks');
 
 const Post = sequelize.define('post', {
   _id: {
@@ -21,20 +21,34 @@ const Post = sequelize.define('post', {
     autoIncrement: true
   },
   title: Sequelize.STRING,
+  date: Sequelize.STRING,
   createdAt: Sequelize.DATE,
   content: Sequelize.STRING,
   author: Sequelize.STRING
 });
 
+
+const Author = sequelize.define('author', {
+  _id: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: Sequelize.STRING,
+  age: Sequelize.INTEGER,
+});
+
+Author.sync();
 Post.sync();
 
-// const GlobalId = new GraphQLObjectType({
-//   name: 'GlobalId',
-//   fields: () => ({
-//     globalId: {type: new GraphQLNonNull(GraphQLString)},
-//     query: {type: new GraphQLNonNull(GraphQLString)}
-//   });
-// });
+const AuthorQL = new GraphQLObjectType({
+  name: 'Author',
+  fields: () => ({
+    _id: {type: new GraphQLNonNull(GraphQLInt)},
+    author: {type: new GraphQLNonNull(GraphQLInt)},
+    age: {type: new GraphQLNonNull(GraphQLString)}
+  })
+});
 
 
 const PostQL = new GraphQLObjectType({
@@ -42,22 +56,11 @@ const PostQL = new GraphQLObjectType({
   fields: () => ({
     _id: {type: new GraphQLNonNull(GraphQLInt)},
     title: {type: new GraphQLNonNull(GraphQLString)},
-    createdAt: {type: new GraphQLNonNull(GraphQLString)},
+    date: {type: new GraphQLNonNull(GraphQLString)},
     content: {type: new GraphQLNonNull(GraphQLString)},
     author: {type: new GraphQLNonNull(GraphQLString)},
   })
 });
-
-// const PostQL = new GraphQLObjectType({
-//   name: 'Post',
-//   fields: () => ({
-//     _id: {type: GraphQLInt},
-//     title: {type: GraphQLString},
-//     createdAt: {type: GraphQLString},
-//     content: {type: GraphQLString},
-//     author: {type: GraphQLString}
-//   })
-// });
 
 const Query = new GraphQLObjectType({
   name: 'RootQueries',
@@ -89,7 +92,6 @@ const Query = new GraphQLObjectType({
       },
       resolve(rootValue, args, request) {
         const search = Object.assign({}, args);
-        // console.log(search);
         return Post.findAll({where : search});
       }
     },
@@ -99,9 +101,7 @@ const Query = new GraphQLObjectType({
         count : {type: GraphQLInt}
       },
       resolve(rootValue, args, request) {
-        // const result = Post.findAll({});
         return Post.findAll({});
-        // console.log(Post.findAll({}));
       }
     }
   })
@@ -115,7 +115,8 @@ const Mutation = new GraphQLObjectType({
       args: {
         title: {type: new GraphQLNonNull(GraphQLString)},
         content: {type: new GraphQLNonNull(GraphQLString)},
-        author: {type: new GraphQLNonNull(GraphQLString)}
+        author: {type: new GraphQLNonNull(GraphQLString)},
+        date: {type: new GraphQLNonNull(GraphQLString)}
       },
       resolve: (source, args) => {
         let post = Object.assign({}, args);

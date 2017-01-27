@@ -1,6 +1,6 @@
 'use strict';
 
-let QLegance = (()=>{
+let QL = (()=>{
 
   return new Binder();
 
@@ -19,12 +19,21 @@ let QLegance = (()=>{
       single.getServer = () => { return server; };
       single.setServer = (serv) => { server = serv; return server; };
 
+      single.query = (string) => {
+        return sendQuery("query" + string);
+      };
+
+      single.mutate = (string) => {
+        return sendQuery("mutation" + string);
+      };
+
       for(let i = 0; i < len; i++){
         component = {element: elements[i]};
         fields = elements[i].querySelectorAll('[ql-field]');
 
         type = getAttr(component.element).split('|');
 
+        component.partial = component.element.cloneNode(true);
         component.type_name = type[0].trim(); // ie. a schema defined for User
         component.staged_query = type[1].trim(); // ie. getUser(limit: 1)
         component.fields = [];
@@ -51,40 +60,61 @@ let QLegance = (()=>{
         return sendQuery(query);
       };
 
+      introspect();
+
       return single;
 
       function domSelection(selection){
         /* selection can be called QLegance('#users(2)') to make list selections
         */
-        let collection;
-        if(typeof selection === 'string'){
-          collection = document.querySelectorAll(selection);
-          if(selection.indexOf('#') !== -1){
-            collection = collection[0];
-          }
+
+        //Check if selection is a wrapper object
+        if(selection.mutate !== undefined && selection.query !== undefined && selection.element !== undefined){
+          return selection;
         }
-        return wrapElement(collection);
+
+        //Check if selection is unacceptable - neither node or string value
+        if((selection.nodeType === undefined && selection.nodeName === undefined) && typeof selection !== 'string'){
+          return new Error('Unacceptable input value.');
+        }
+
+        // If selection is string perform a DOM query
+        if(typeof selection === 'string'){
+          selection = document.querySelectorAll(selection);
+
+          //No returned elements to wrap
+          if(selection.length === 0) return selection;
+        }
+
+        return wrapElement(selection);
       }
 
       function wrapElement(selection){
-        let wrapper = {element: selection};
+        let len = selection.length;
+        let wrapper = [];
 
-        wrapper.mutate = (method, args, returnValues, options) => {
-          return new Promise((resolve, reject) => {
-            method = 'getUser', args = {username: "Markle"}, returnValues = ['password'];
-            QLegance[method](args, returnValues).then((result) => {
-              let component = Client.components.find( component => { return selection === component.element; });
-              //if(!component) component = buildcomponent(selection);
-              populate(component, result.data);
+        for(let i = 0; i < len; i++){
+        wrapper[i] = {element: selection[i]};
+        console.log('selection: ', selection[i]);
+
+        wrapper[i].mutate = ((method, args, returnValues) => {
+          return single[method](args, returnValues).then((result) => {
+              let component = Client.components.find( component => { return selection[i] === component.element; });
+              prePopulate(component, result.data);
               resolve(result.data);
             });
-          })
-        };
+        });
 
-        wrapper.query = (fragment) => {
-
+        wrapper[i].query = (method, args, returnValues) => {
+          return single[method](args, returnValues).then((result) => {
+            let component = Client.components.find( component => { return selection[i] === component.element; });
+            console.log('I need this component', component);
+            prePopulate(component, result.data);
+            return result.data;
+          });
         };
-        return wrapper;
+      }
+        return wrapper.length > 1 ? wrapper : wrapper[0];
       }
 
       function getAttr(element){
@@ -92,8 +122,13 @@ let QLegance = (()=>{
       }
 
       function buildQuery(component){
+        let str = component.staged_query;
+        if(str[str.length - 1] === ')' && str[str.length - 2] === '('){
+          str = parseStagedQuery(str);
+        }
+
         return `{
-          ${component.staged_query}{
+          ${str}{
             ${component.fields.map(field => {return field.name; }).join('\n')}
           }
         }`;
@@ -147,29 +182,184 @@ let QLegance = (()=>{
 
       function prePopulate(component, data){
         let input,
-         template, len, element, html = '';
-        let queryKey = parseStagedQuery(component.staged_query);
+         template, len, element, html = '', value;
+
+        let queryKey = Object.keys(data)[0];
 
         data = data[queryKey];
-        len =  component.list ? data.length : 1;
-        data = len > 1 ? data : [data];
+        len = data.length || 1;
+        data = Array.isArray(data) ? data : [data];
 
         for(let i = 0; i < len; i++){
-          template = component.element.cloneNode(true);
-
+          template = component.partial.cloneNode(true);
           component.fields.forEach((field) => {
             element = template.querySelector(`[ql-field=${field.name}]`);
             if(element.nodeName.toLowerCase() === 'input'){
+              if(data[i][field.name] === 'undefined') return;
               element.setAttribute('value', data[i][field.name]);
             }else{
+              if(data[i][field.name] === 'undefined') return;
               element.innerHTML = data[i][field.name];
             }
           });
           html += template.innerHTML;
         }
+
         component.element.innerHTML = html;
       }
 
+    function introspect() {
+      const introspectiveQuery = `
+        {
+          __schema {
+            mutationType {
+              name
+              fields {
+                name
+                type {
+                  name
+                  kind
+                }
+                args {
+                  name
+                  defaultValue
+                  type {
+                    kind
+                    name
+                    ofType {
+                      kind
+                      name
+                    }
+                  }
+                }
+              }
+            }
+            queryType {
+              name
+              fields {
+                name
+                type {
+                  name
+                  kind
+                }
+                args {
+                  name
+                  defaultValue
+                  type {
+                    kind
+                    name
+                    ofType {
+                      kind
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      sendQuery(introspectiveQuery)
+        .then((res) => {
+          console.log(res);
+          const fields = [];
+          for (let i = 0; i < res.data.__schema.mutationType.fields.length; i += 1) {
+            // console.log(res.data.__schema.mutationType.fields[i]);
+            res.data.__schema.mutationType.fields[i].query = 'mutation';
+            fields.push(res.data.__schema.mutationType.fields[i]);
+          }
+          for (let i = 0; i < res.data.__schema.queryType.fields.length; i += 1) {
+            // console.log(res.data.__schema.queryType.fields[i]);
+            res.data.__schema.queryType.fields[i].query = 'query';
+            fields.push(res.data.__schema.queryType.fields[i]);
+          }
+          // res.data.__schema.mutationType.fields.concat(res.data.__schema.queryType.fields);
+          //console.log('fields:', fields);
+          //this.types = {};
+          // loop through fields
+          for (let i = 0; i < fields.length; i += 1) {
+          //  typeFieldConstructor(fields[i]);
+            methodConstructor(fields[i]);
+          }
+        });
+
+    }
+
+      function typeFieldConstructor(field) {
+          if (!this.types[field.type.name]) {
+            if (field.type.name) {
+              this.types[field.type.name] = [];
+            } else {
+              this.types[field.type.kind] = [];
+            }
+          }
+          if (field.type.name) {
+            // console.log('valid type');
+            this.types[field.type.name].push(field.name);
+          } else {
+            this.types[field.type.kind].push(field.name);
+          }
+        }
+
+        function methodConstructor(field) {
+          // ex: QLegance.field_name({}, [returning values])
+
+          // construct tempFunc based on information in field
+          const tempFunc = (obj, arr) => {
+            let returnValues = arr.join('\n');
+
+            // field that does take arguments
+            if (field.args.length) {
+              let args = '';
+              for (let i = 0 ; i < field.args.length; i += 1) {
+                let end = ''
+                if (i < field.args.length - 1) end += ', ';
+
+                if (field.args[i].type.kind === 'NON_NULL') {
+                  if (field.args[i].name in obj) {
+                    const item = typeConverter(field.args[i].type.ofType.name, obj[field.args[i].name]);
+                    args += `${field.args[i].name} : ${item}${end}`
+                  }
+                } else {
+                  if (field.args[i].name in obj) {
+                    const item = typeConverter(field.args[i].type.name, obj[field.args[i].name]);
+                    args += `${field.args[i].name} : ${item}${end}`
+                  }
+                }
+              }
+              return sendQuery(`
+                ${field.query} {
+                  ${field.name}(${args}) {
+                    ${returnValues}
+                  }
+                }
+              `);
+
+            // field that does not take arguments
+            } else {
+              return sendQuery(`
+                ${field.query} {
+                  ${field.name} {
+                    ${returnValues}
+                  }
+                }
+              `);
+            }
+          }
+
+          // append tempFunc as method to QLegance object with the associted field name
+          single[field.name] = tempFunc;
+      }
+
+        function typeConverter(type, item) {
+          if (type === 'String') {
+            return `"${item}"`;
+          }
+          if (type === 'Int' || type === 'Float') {
+            return Number(item);
+          }
+        }
     }
 })();
 
