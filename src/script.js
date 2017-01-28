@@ -9,6 +9,7 @@ document.onreadystatechange = (event) =>{
 let search = document.querySelector('.search-field');
 
 function app() {
+  QL.initializer();
   let titleButton = document.querySelector('.title-button');
   let authorButton = document.querySelector('.author-button');
 
